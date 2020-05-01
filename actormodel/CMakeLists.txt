@@ -86,8 +86,7 @@ include_directories(
 target_link_libraries(
     ${PROJECT_NAME}
     Qt5::Core
-    Qt5::Network
-    Qt5::Xml
+    Qt5::Widgets
 )
 
 if(NOT WIN32)

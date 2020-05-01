@@ -33,14 +33,7 @@
 #include <QMetaObject>
 #include <QMetaMethod>
 #include <QMetaType>
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkRequest>
-#include <QtNetwork/QNetworkReply>
-#include <QtNetwork/QNetworkProxy>
-#include <QtNetwork/QAuthenticator>
 #include <QTimer>
-#include <QTcpSocket>
-#include <QTcpServer>
 #include <QMutex>
 #include <QMutexLocker>
 #include <QReadWriteLock>
@@ -50,7 +43,6 @@
 #include <QDebug>
 #include <QProcess>
 #include <QDateTime>
-#include <QAbstractNetworkCache>
 #include <QStringBuilder>
 #include <QFile>
 #include <QFileInfo>
@@ -62,6 +54,12 @@
 #include <QDir>
 #include <QUrlQuery>
 #include <QJsonDocument>
+#include <QWidget>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QPushButton>
 
 //
 // C/C++
@@ -107,31 +105,5 @@ using std::size_t;
 #ifndef PRODUCTION
 #define DEBUG
 #endif
-
-/*
-#if defined(Q_OS_WIN)
-
-#include <ws2tcpip.h>
-#include <mstcpip.h>
-
-#define CANNOT_CREATE_SOCKET INVALID_SOCKET
-
-#endif
-
-#if defined(Q_OS_MACOS) || defined(Q_OS_UNIX)
-
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/select.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <fcntl.h>
-
-#define SOCKET int
-#define CANNOT_CREATE_SOCKET -1
-
-#endif
-*/
 
 using namespace std::chrono_literals;

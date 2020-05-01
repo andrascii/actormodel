@@ -3,85 +3,70 @@
 #include "handler_registry.h"
 #include "thread_message_dispatcher.h"
 
-namespace CrawlerEngine
+namespace MessageDispatcher
 {
 
-Requester::Requester(const IRequest& request)
-	: m_request(request.clone())
-	, m_state(StateClear)
-{
-	HandlerRegistry& handlerRegistry = HandlerRegistry::instance();
-	m_handler = handlerRegistry.handlerForRequest(request);
+Requester::Requester(const IRequest& request) : request_(request.clone()), state_(StateClear) {
+  HandlerRegistry& handler_registry = HandlerRegistry::instance();
+  handler_ = handler_registry.handler_for_request(request);
 
-	ASSERT(m_handler && "Handler for this request was not registered");
+  ASSERT(handler_ && "Handler for this request was not registered");
 
-	qRegisterMetaType<Requester>("Requester");
-	qRegisterMetaType<RequesterSharedPtr>("RequesterSharedPtr");
+  qRegisterMetaType<Requester>("Requester");
+  qRegisterMetaType<RequesterSharedPtr>("RequesterSharedPtr");
 }
 
 Requester::Requester(const Requester& other)
-	: m_request(other.m_request)
-	, m_delegate(other.m_delegate)
-	, m_handler(other.m_handler)
-	, m_state(other.m_state)
-{
+  : request_(other.request_),
+    delegate_(other.delegate_),
+    handler_(other.handler_),
+    state_(other.state_) {
 }
 
-QObject* Requester::handler() const noexcept
-{
-	return m_handler;
+QObject* Requester::handler() const noexcept {
+  return handler_;
 }
 
-IRequest* Requester::request() const noexcept
-{
-	return m_request.get();
+IRequest* Requester::request() const noexcept {
+  return request_.get();
 }
 
-Requester::State Requester::state() const noexcept
-{
-	return m_state;
+Requester::State Requester::state() const noexcept {
+  return state_;
 }
 
-void Requester::start()
-{
-	m_state = StateWorking;
-
-	ThreadMessageDispatcher::forCurrentThread()->startRequest(shared_from_this());
+void Requester::start() {
+  state_ = StateWorking;
+  ThreadMessageDispatcher::for_current_thread()->start_request(shared_from_this());
 }
 
-void Requester::stop()
-{
-	m_state = StateStopped;
-
-	ThreadMessageDispatcher::forCurrentThread()->stopRequest(shared_from_this());
+void Requester::stop() {
+  state_ = StateStopped;
+  ThreadMessageDispatcher::for_current_thread()->stop_request(shared_from_this());
 }
 
-void Requester::processResponse(const IResponse& response) const
-{
-	if (m_state == StateStopped)
-	{
-		return;
-	}
+void Requester::process_response(const IResponse& response) const {
+  if (state_ == StateStopped) {
+    return;
+  }
 
-	m_delegate(response);
+  delegate_(response);
 
-	HandlerRegistry& handlerRegistry = HandlerRegistry::instance();
+  HandlerRegistry& handler_registry = HandlerRegistry::instance();
 
-	const std::vector<HandlerRegistry::Subscription> subscriptions =
-		handlerRegistry.subscriptionsFor(m_handler, response.type());
+  const std::vector<HandlerRegistry::Subscription> subscriptions =
+    handler_registry.subscriptions_for(handler_, response.type());
 
-	for (const HandlerRegistry::Subscription& subscription : subscriptions)
-	{
-		if (!subscription.subscriber)
-		{
-			continue;
-		}
+  for (const HandlerRegistry::Subscription& subscription : subscriptions) {
+    if (!subscription.subscriber) {
+      continue;
+    }
 
-		const Qt::ConnectionType connectionType = subscription.subscriber->thread() == QThread::currentThread() ?
-			Qt::DirectConnection : Qt::QueuedConnection;
+    const Qt::ConnectionType connectionType = subscription.subscriber->thread() == QThread::currentThread() ?
+      Qt::DirectConnection : Qt::QueuedConnection;
 
-		VERIFY(subscription.method.invoke(subscription.subscriber, connectionType, Q_ARG(const IResponse&, response)));
-	}
+    VERIFY(subscription.method.invoke(subscription.subscriber, connectionType, Q_ARG(const IResponse&, response)));
+  }
 }
 
-}
+}  // namespace MessageDispatcher

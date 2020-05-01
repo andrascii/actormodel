@@ -3,42 +3,39 @@
 #include "iresponse.h"
 #include "requester.h"
 
-namespace CrawlerEngine
-{
+namespace MessageDispatcher {
 
 class IRequest;
 
-class Message
-{
-public:
-	enum MessageType
-	{
-		MessageTypeUndefined,
-		MessageTypeStartRequest,
-		MessageTypeStopRequest,
-		MessageTypePostResponse
-	};
+class Message {
+ public:
+  enum MessageType {
+    MessageTypeUndefined,
+    MessageTypeStartRequest,
+    MessageTypeStopRequest,
+    MessageTypePostResponse
+  };
 
-	static Message undefinedMessage();
-	static Message startRequestMessage(RequesterSharedPtr requester);
-	static Message stopRequestMessage(RequesterSharedPtr requester);
-	static Message postResponseMessage(RequesterSharedPtr requester, IResponseSharedPtr response);
+  static Message undefined_message();
+  static Message start_request_message(RequesterSharedPtr requester);
+  static Message stop_request_message(RequesterSharedPtr requester);
+  static Message post_response_message(RequesterSharedPtr requester, IResponseSharedPtr response);
 
-	MessageType type() const noexcept;
-	QThread* targetThread() const noexcept;
-	RequesterSharedPtr requester() const noexcept;
-	IResponse* response() const noexcept;
-	IRequest* request() const noexcept;
-	QObject* handler() const noexcept;
+  MessageType type() const noexcept;
+  QThread* target_thread() const noexcept;
+  RequesterSharedPtr requester() const noexcept;
+  IResponse* response() const noexcept;
+  IRequest* request() const noexcept;
+  QObject* handler() const noexcept;
 
-private:
-	Message(MessageType type, QThread* targetThread, RequesterSharedPtr requester, IResponseSharedPtr response);
+ private:
+  Message(MessageType type, QThread* target_thread, RequesterSharedPtr requester, IResponseSharedPtr response);
 
-private:
-	MessageType m_type;
-	QThread* m_targetThread;
-	RequesterSharedPtr m_requester;
-	IResponseSharedPtr m_response;
+ private:
+  MessageType type_;
+  QThread* target_thread_;
+  RequesterSharedPtr requester_;
+  IResponseSharedPtr response_;
 };
 
-}
+}  // namespace MessageDispatcher

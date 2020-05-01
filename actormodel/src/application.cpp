@@ -1,42 +1,25 @@
 #include "application.h"
-#include "download_request.h"
-#include "download_response.h"
 #include "thread_manager.h"
-#include "qt_based_download_handler.h"
+#include "math_operation_handler.h"
+#include "math_operation_request.h"
+#include "math_operation_response.h"
 
-using namespace CrawlerEngine;
+namespace MessageDispatcher {
 
-Application::Application(int& argc, char** argv) : QCoreApplication(argc, argv)
-{
-  registerDownloadHandler();
-
-  CrawlerRequest crawlerRequest{ Url("https://praimont.ru"), DownloadRequestType::RequestTypeGet };
-
-  DownloadRequest request(
-    crawlerRequest,
-    0,
-    DownloadRequest::Status::LinkStatusFirstLoading,
-    DownloadRequest::BodyProcessingCommand::CommandAutoDetectionBodyLoading,
-    true
-  );
-
-  m_requester.reset(request, this, &Application::onLoadingDone);
-  m_requester->start();
+Application::Application(int& argc, char** argv) : QApplication(argc, argv) {
+  registrate_math_handler();
+  initialize();
 }
 
-void Application::registerDownloadHandler() const
-{
-  ThreadManager& threadManager = ThreadManager::instance();
-  threadManager.moveObjectToThread(new QtBasedDownloadHandler, "DownloaderThread");
+void Application::registrate_math_handler() const {
+  ThreadManager& thread_manager = ThreadManager::instance();
+  thread_manager.move_object_to_thread(new Services::MathOperationHandler(), "Math Operation Handler Thread");
 }
 
-void Application::onLoadingDone(CrawlerEngine::Requester* requester, const CrawlerEngine::DownloadResponse& response)
-{
-  for (const auto& hop : response.hopsChain)
-  {
-    qDebug() << "Loaded: " << hop.url().toDisplayString();
-    qDebug() << hop.responseHeaders().makeString();
-  }
-
-  m_requester.reset();
+void Application::initialize() { 
+  example_widget_ = std::make_unique<ExampleWidget>();
+  example_widget_->show();
 }
+
+
+}  // namespace MessageDispatcher

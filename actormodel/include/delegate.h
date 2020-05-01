@@ -1,21 +1,19 @@
 #pragma once
 
-namespace CrawlerEngine
-{
+namespace MessageDispatcher {
 
 class IResponse;
 
-class Delegate
-{
-public:
-	typedef std::function<void(const IResponse&)> Callback;
+class Delegate {
+ public:
+  typedef std::function<void(const IResponse&)> Callback;
 
-	void clear();
-	void add(const Callback& callback);
-	void operator()(const IResponse& response) const;
+  void clear();
+  void add(const Callback& callback);
+  void operator()(const IResponse& response) const;
 
-private:
-	std::vector<Callback> m_callbacks;
+ private:
+  std::vector<Callback> callbacks_;
 };
 
-}
+}  // namespace MessageDispatcher

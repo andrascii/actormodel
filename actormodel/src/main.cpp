@@ -3,6 +3,6 @@
 
 int main(int argc, char** argv)
 {
-  Application app(argc, argv);
+  MessageDispatcher::Application app(argc, argv);
   return app.exec();
 }

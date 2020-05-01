@@ -1,25 +1,28 @@
 #pragma once
 
 #include "requester_wrapper.h"
+#include "example_widget.h"
 
-namespace CrawlerEngine
-{
+namespace Services {
 
-struct DownloadResponse;
+struct MathOperationResponse;
 
-}
+}  // namespace Services
 
-class Application : public QCoreApplication
-{
+namespace MessageDispatcher {
+
+class Application : public QApplication {
   Q_OBJECT
 
-public:
+ public:
   Application(int& argc, char** argv);
 
-private:
-  void registerDownloadHandler() const;
-  void onLoadingDone(CrawlerEngine::Requester* requester, const CrawlerEngine::DownloadResponse& response);
+ private:
+  void initialize();
+  void registrate_math_handler() const;
 
-private:
-  CrawlerEngine::RequesterWrapper m_requester;
+ private:
+  std::unique_ptr<ExampleWidget> example_widget_;
 };
+
+}  // namespace MessageDispatcher

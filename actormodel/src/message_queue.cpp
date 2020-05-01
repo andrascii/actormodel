@@ -1,40 +1,34 @@
 #include "stdafx.h"
 #include "message_queue.h"
 
-namespace CrawlerEngine
-{
+namespace MessageDispatcher {
 
-void MessageQueue::addMessage(const Message& message)
-{
-	std::lock_guard locker(m_mutex);
-	m_messages.push_back(message);
+void MessageQueue::add_message(const Message& message) {
+  std::lock_guard<std::mutex> locker(mutex_);
+  messages_.push_back(message);
 }
 
-void MessageQueue::addMessage(Message&& message)
-{
-	std::lock_guard locker(m_mutex);
-	m_messages.emplace_back(std::move(message));
+void MessageQueue::add_message(Message&& message) {
+  std::lock_guard<std::mutex> locker(mutex_);
+  messages_.emplace_back(std::move(message));
 }
 
-bool MessageQueue::isEmpty() const noexcept
-{
-	std::lock_guard locker(m_mutex);
-	return m_messages.empty();
+bool MessageQueue::is_empty() const noexcept {
+  std::lock_guard<std::mutex> locker(mutex_);
+  return messages_.empty();
 }
 
-Message MessageQueue::extractMessage()
-{
-	std::lock_guard locker(m_mutex);
+Message MessageQueue::extract_message() {
+  std::lock_guard<std::mutex> locker(mutex_);
 
-	if (!m_messages.size())
-	{
-		return Message::undefinedMessage();
-	}
+  if (!messages_.size()) {
+    return Message::undefined_message();
+  }
 
-	Message message = std::move(m_messages.back());
-	m_messages.pop_back();
+  Message message = std::move(messages_.back());
+  messages_.pop_back();
 
-	return std::move(message);
+  return message;
 }
 
-}
+}  // namespace MessageDispatcher

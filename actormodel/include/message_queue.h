@@ -2,23 +2,19 @@
 
 #include "message.h"
 
-namespace CrawlerEngine
-{
+namespace MessageDispatcher {
 
-class MessageQueue
-{
-public:
-	void addMessage(const Message& message);
-	void addMessage(Message&& message);
+class MessageQueue {
+ public:
+  void add_message(const Message& message);
+  void add_message(Message&& message);
+  Message extract_message();
 
-	bool isEmpty() const noexcept;
+  bool is_empty() const noexcept;
 
-	Message extractMessage();
-
-private:
-	mutable std::mutex m_mutex;
-
-	std::vector<Message> m_messages;
+ private:
+  mutable std::mutex mutex_;
+  std::vector<Message> messages_;
 };
 
-}
+}  // namespace MessageDispatcher

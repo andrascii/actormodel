@@ -5,101 +5,96 @@
 #include "meta_helpers.h"
 #include "requester.h"
 
-DEFINE_METHOD_CHECK(handleRequest)
-DEFINE_METHOD_CHECK(stopRequestHandling)
+DEFINE_METHOD_CHECK(handle_request)
+DEFINE_METHOD_CHECK(stop_request_handling)
 
-namespace CrawlerEngine
-{
+namespace MessageDispatcher {
 
 template <typename T>
-struct RequestTypeHelper
-{
-	static constexpr bool value = std::is_same<T, RequestType>::value;
+struct RequestTypeHelper {
+  static constexpr bool value = std::is_same<T, RequestType>::value;
 };
 
 
-class HandlerRegistry
-{
-public:
-	struct Subscription
-	{
-		QPointer<QObject> subscriber;
-		QMetaMethod method;
-	};
+class HandlerRegistry {
+ public:
+  struct Subscription {
+    QPointer<QObject> subscriber;
+    QMetaMethod method;
+  };
 
-	static HandlerRegistry& instance();
+  static HandlerRegistry& instance();
 
-	template <typename ObjectType, typename... RequestTypes>
-	void registrateHandler(ObjectType* handler, RequestTypes&&... requestTypes)
-	{
-		static_assert(sizeof...(requestTypes) > 0, "Passed empty request types argument list");
-		static_assert(MetaHelpers::isAllOf<RequestTypeHelper, RequestTypes...>(), "Each request type parameter must be a RequestType");
-		static_assert(std::is_base_of_v<QObject, ObjectType>, "Passed object must be derived from QObject");
-		static_assert(MetaHelpers::HasMethod_handleRequest<ObjectType, RequesterSharedPtr>::value, "Passed object does not contain handleRequest function");
-		static_assert(MetaHelpers::HasMethod_stopRequestHandling<ObjectType, RequesterSharedPtr>::value, "Passed object does not contain stopRequestHandling function");
+  template <typename ObjectType, typename... RequestTypes>
+  void registrate_handler(ObjectType* handler, RequestTypes&&... request_types) {
+    static_assert(sizeof...(request_types) > 0, "Passed empty request types argument list");
 
-		std::lock_guard locker(m_mutex);
+    static_assert(MetaHelpers::is_all_of<RequestTypeHelper, RequestTypes...>(),
+      "Each request type parameter must be of RequestType enumeration type");
 
-		const auto conditionCheckerFunctor = [this](RequestType requestType)
-		{
-			return m_handlers.find(requestType) == m_handlers.end();
-		};
+    static_assert(std::is_base_of_v<QObject, ObjectType>, "Passed object must be derived from QObject");
 
-		ASSERT(MetaHelpers::isEachArgument(conditionCheckerFunctor, std::forward<RequestTypes>(requestTypes)...));
+    static_assert(MetaHelpers::HasMethod_handle_request<ObjectType, RequesterSharedPtr>::value,
+      "Passed object does not contain handleRequest function");
 
-		const auto functor = [this, handler](RequestType requestType)
-		{
-			m_handlers[requestType] = static_cast<QObject*>(handler);
-		};
+    static_assert(MetaHelpers::HasMethod_stop_request_handling<ObjectType, RequesterSharedPtr>::value,
+      "Passed object does not contain stopRequestHandling function");
 
-		MetaHelpers::callForAllArgumentsInPack(functor, std::forward<RequestTypes>(requestTypes)...);
-	}
+    std::lock_guard<std::mutex> locker(mutex_);
 
-	void addSubscription(Subscription subscriber, QObject* handler, ResponseType responseType);
-	bool hasSubscriptionsFor(QObject* handler, ResponseType responseType) const;
-	std::vector<Subscription> subscriptionsFor(QObject* handler, ResponseType responseType) const;
+    const auto condition_checker_functor = [this](RequestType requestType) {
+      return handlers_.find(requestType) == handlers_.end();
+    };
 
-	void unregistrateHandler(QObject* handler);
-	void unregisterAll();
+    ASSERT(MetaHelpers::is_each_argument(condition_checker_functor, std::forward<RequestTypes>(request_types)...));
 
-	QObject* handlerForRequest(const IRequest& request);
-	QObject* handlerForRequest(RequestType requestType);
-	bool isHandlerExists(QObject* handler) const;
+    const auto functor = [this, handler](RequestType requestType) {
+      handlers_[requestType] = static_cast<QObject*>(handler);
+    };
 
-private:
-	HandlerRegistry() = default;
-	HandlerRegistry(const HandlerRegistry&) = delete;
-	HandlerRegistry(HandlerRegistry&&) = delete;
+    MetaHelpers::call_for_all_arguments_in_pack(functor, std::forward<RequestTypes>(request_types)...);
+  }
 
-	std::pair<bool, RequestType> requestTypeForValue(QObject* handler) const;
+  void add_subscription(Subscription subscriber, QObject* handler, ResponseType response_type);
+  bool has_subscriptions_for(QObject* handler, ResponseType response_type) const;
+  std::vector<Subscription> subscriptions_for(QObject* handler, ResponseType response_type) const;
 
-private:
-	mutable std::mutex m_mutex;
+  void unregistrate_handler(QObject* handler);
+  void unregister_all();
 
-	struct SubscriptionKey
-	{
-		ResponseType responseType;
-		QObject* handler;
+  QObject* handler_for_request(const IRequest& request);
+  QObject* handler_for_request(RequestType request_type);
+  bool is_handler_exists(QObject* handler) const;
 
-		friend bool operator==(const SubscriptionKey& lhs, const SubscriptionKey& rhs)
-		{
-			return lhs.responseType == rhs.responseType && lhs.handler == rhs.handler;
-		}
-	};
+ private:
+  HandlerRegistry() = default;
+  HandlerRegistry(const HandlerRegistry&) = delete;
+  HandlerRegistry(HandlerRegistry&&) = delete;
 
-	struct SubscriptionKeyHasher
-	{
-		size_t operator()(const SubscriptionKey& key) const
-		{
-			std::hash<int> intHasher;
-			std::hash<QObject*> pointerHasher;
+  std::pair<bool, RequestType> request_type_for_value(QObject* handler) const;
 
-			return intHasher(static_cast<int>(key.responseType)) + pointerHasher(key.handler);
-		}
-	};
+ private:
+  mutable std::mutex mutex_;
 
-	std::map<RequestType, QObject*> m_handlers;
-	std::unordered_map<SubscriptionKey, std::vector<Subscription>, SubscriptionKeyHasher> m_subscriptions;
+  struct SubscriptionKey {
+    ResponseType response_type;
+    QObject* handler;
+
+    friend bool operator==(const SubscriptionKey& lhs, const SubscriptionKey& rhs) {
+      return lhs.response_type == rhs.response_type && lhs.handler == rhs.handler;
+    }
+  };
+
+  struct SubscriptionKeyHasher {
+    size_t operator()(const SubscriptionKey& key) const {
+      std::hash<int> int_hasher;
+      std::hash<QObject*> pointer_hasher;
+      return int_hasher(static_cast<int>(key.response_type)) + pointer_hasher(key.handler);
+    }
+  };
+
+  std::map<RequestType, QObject*> handlers_;
+  std::unordered_map<SubscriptionKey, std::vector<Subscription>, SubscriptionKeyHasher> subscriptions_;
 };
 
-}
+}  // namespace MessageDispatcher

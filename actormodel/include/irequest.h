@@ -1,29 +1,16 @@
 #pragma once
 
-namespace CrawlerEngine
-{
+namespace MessageDispatcher {
 
-enum class RequestType
-{
-	RequestDownload,
-	RequestGetHostInfo,
-	RequestTypeRunTask,
-	RequestCheck404IsProper,
-	RequestSetSerialNumber,
-	RequestGetSerialNumberData,
-	RequestGetSerialNumberState,
-	RequestTakeScreenshot,
-	RequestPauseConnections,
-	RequestUnpauseConnections,
-	RequestResetConnections
+enum class RequestType {
+	RequestMathOperation
 };
 
-class IRequest
-{
-public:
-	virtual ~IRequest() = default;
-	virtual std::shared_ptr<IRequest> clone() const = 0;
-	virtual RequestType requestType() const noexcept = 0;
+class IRequest {
+ public:
+  virtual ~IRequest() = default;
+  virtual std::shared_ptr<IRequest> clone() const = 0;
+  virtual RequestType request_type() const noexcept = 0;
 };
 
-}
+}  // namespace MessageDispatcher

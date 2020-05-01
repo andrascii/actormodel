@@ -1,25 +1,20 @@
 #include "stdafx.h"
 #include "delegate.h"
 
-namespace CrawlerEngine
-{
+namespace MessageDispatcher {
 
-void Delegate::clear()
-{
-	m_callbacks.clear();
+void Delegate::clear() {
+  callbacks_.clear();
 }
 
-void Delegate::add(const Callback& callback)
-{
-	m_callbacks.push_back(callback);
+void Delegate::add(const Callback& callback) {
+  callbacks_.push_back(callback);
 }
 
-void Delegate::operator()(const IResponse& response) const
-{
-	for (const Callback& callback : m_callbacks)
-	{
-		callback(response);
-	}
+void Delegate::operator()(const IResponse& response) const {
+  for (const Callback& callback : callbacks_) {
+    callback(response);
+  }
 }
 
-}
+}  // namespace MessageDispatcher

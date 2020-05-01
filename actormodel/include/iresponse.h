@@ -1,48 +1,32 @@
 #pragma once
 
-namespace CrawlerEngine
-{
+namespace MessageDispatcher {
 
-enum class ResponseType
-{
-	ResponseTypeUnknown,
-	ResponseTypeDownload,
-	ResponseTypeDownloadProgress,
-	ResponseTypeUploadProgress,
-	ResponseTypeGetHostInfo,
-	ResponseTypeTaskResult,
-	ResponseTypeCheck404IsProper,
-	ResponseSetSerialNumber,
-	ResponseGetSerialNumberData,
-	ResponseGetSerialNumberState,
-	ResponseTakeScreenshot,
-	ResponseResetConnections
+enum class ResponseType {
+	ResponseTypeMathOperation
 };
 
 #define DECLARE_RESPONSE_STATIC_TYPE(Type) \
-	static CrawlerEngine::ResponseType responseStaticType();
+  static MessageDispatcher::ResponseType response_static_type();
 
 #define DEFINE_RESPONSE_STATIC_TYPE(ObjectType, Type) \
-	CrawlerEngine::ResponseType ObjectType::responseStaticType() \
-	{ \
-		return Type; \
-	}
+  MessageDispatcher::ResponseType ObjectType::response_static_type() { \
+    return Type; \
+  }
 
 #define DEFINE_RESPONSE_STATIC_TYPE_IN_CLASS(Type) \
-	static CrawlerEngine::ResponseType responseStaticType() \
-	{ \
-		return Type; \
-	}
+  static MessageDispatcher::ResponseType response_static_type() {\
+    return Type; \
+  }
 
-class IResponse
-{
-public:
-	virtual ~IResponse() = default;
-	virtual ResponseType type() const noexcept = 0;
+class IResponse {
+ public:
+  virtual ~IResponse() = default;
+  virtual ResponseType type() const noexcept = 0;
 };
 
 using IResponseSharedPtr = std::shared_ptr<IResponse>;
 
-}
+}  // namespace MessageDispatcher
 
-Q_DECLARE_METATYPE(CrawlerEngine::IResponseSharedPtr);
+Q_DECLARE_METATYPE(MessageDispatcher::IResponseSharedPtr);

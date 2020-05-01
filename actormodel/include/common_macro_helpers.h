@@ -29,13 +29,11 @@
 #ifndef UNIX_TEMPORARY_LOGS_STUB
 #define UNIX_TEMPORARY_LOGS_STUB
 
-struct UnixTemporaryLogsStub
-{
-    template <typename T>
-    UnixTemporaryLogsStub& operator<<(const T&)
-    {
-        return *this;
-    }
+struct UnixTemporaryLogsStub {
+  template <typename T>
+  UnixTemporaryLogsStub& operator<<(const T&) {
+      return *this;
+  }
 };
 
 #endif
