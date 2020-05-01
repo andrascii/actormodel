@@ -69,14 +69,14 @@ namespace MessageDispatcher {
 std::shared_ptr<ThreadMessageDispatcher> ThreadMessageDispatcher::for_thread(QThread* thread) {
   std::lock_guard locker(s_mutex);
 
-  std::shared_ptr<ThreadMessageDispatcher> threadQueuePtr = thread_queue(thread);
+  std::shared_ptr<ThreadMessageDispatcher> thread_queue_ptr = thread_queue(thread);
 
-  if (!threadQueuePtr) {
-    threadQueuePtr.reset(new ThreadMessageDispatcher(thread));
-    register_thread_queue(thread, threadQueuePtr);
+  if (!thread_queue_ptr) {
+    thread_queue_ptr.reset(new ThreadMessageDispatcher(thread));
+    register_thread_queue(thread, thread_queue_ptr);
   }
 
-  return threadQueuePtr;
+  return thread_queue_ptr;
 }
 
 std::shared_ptr<ThreadMessageDispatcher> ThreadMessageDispatcher::for_current_thread() {

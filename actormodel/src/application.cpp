@@ -16,10 +16,9 @@ void Application::registrate_math_handler() const {
   thread_manager.move_object_to_thread(new Services::MathOperationHandler(), "Math Operation Handler Thread");
 }
 
-void Application::initialize() { 
+void Application::initialize() {
   example_widget_ = std::make_unique<ExampleWidget>();
   example_widget_->show();
 }
-
 
 }  // namespace MessageDispatcher
