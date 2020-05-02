@@ -51,7 +51,7 @@ void ExampleWidget::on_calculate_button_clicked() {
   requester_->start();
 }
 
-void ExampleWidget::on_math_operation_done(MessageDispatcher::Requester* requester, const Services::MathOperationResponse& response) {
+void ExampleWidget::on_math_operation_done(MessageDispatcher::Requester*, const Services::MathOperationResponse& response) {
   result_math_operation_label_->setText(QString("Result: %1").arg(response.result));
   requester_.reset();
 }

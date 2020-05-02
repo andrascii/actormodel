@@ -88,9 +88,12 @@
 #include <optional>
 #include <csignal>
 #include <optional>
+#include <limits>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
+#undef max
+#undef min
 #endif
 
 #include "common_macro_helpers.h"
